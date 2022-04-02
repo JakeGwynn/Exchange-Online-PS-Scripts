@@ -6,7 +6,6 @@ $ExportFileName = "C:\Temp\AllResourceRoomCalendarPermissions.csv"
 # List all AccessRights types that you DON'T want to report on
 [array]$AccessRightsExclusions = @(
     "None"
-    "CreateItems"
     "CreateSubfolders"
     "FolderContact"
     "FolderOwner"
@@ -19,7 +18,7 @@ $ExportFileName = "C:\Temp\AllResourceRoomCalendarPermissions.csv"
 )
 
 [System.Collections.Generic.List[psobject]]$AllRoomCalendarPermissions = @()
-$Mailboxes = get-EXOmailbox -RecipientTypeDetails RoomMailbox,SharedMailbox
+$Mailboxes = Get-EXOMailbox -RecipientTypeDetails RoomMailbox,SharedMailbox
 
 foreach ($Mailbox in $Mailboxes) {
     $RoomPermissions = $null
@@ -29,7 +28,7 @@ foreach ($Mailbox in $Mailboxes) {
             If($AccessRight -notin $AccessRightsExclusions) {
                 $PermissionObject = [PSCustomObject]@{}
                 $PermissionObject = [PSCustomObject]@{
-                    RoomMailbox = $Mailbox.UserPrincipalName
+                    Mailbox = $Mailbox.UserPrincipalName
                     UserWithAccess = $PermissionSet.User
                     AccessRights = $AccessRight
                     SharingPermissionFlags = $Permission.SharingPermissionFlags
@@ -41,4 +40,4 @@ foreach ($Mailbox in $Mailboxes) {
     }
 } 
 
-$AllRoomCalendarPermissions | Export-csv -Path $ExportFileName -NoTypeInformation
+$AllRoomCalendarPermissions | Export-Csv -Path $ExportFileName -NoTypeInformation
