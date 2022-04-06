@@ -18,19 +18,23 @@ $ExportFileName = "C:\Temp\AllResourceRoomCalendarPermissions.csv"
 )
 
 [System.Collections.Generic.List[psobject]]$AllRoomCalendarPermissions = @()
-$Mailboxes = Get-EXOMailbox -RecipientTypeDetails RoomMailbox,SharedMailbox
+$AllMailboxes = Get-EXOMailbox -ResultSize unlimited
+$MailboxesToSearch = $AllMailboxes | Where-Object {$_.RecipientTypeDetails -in @("RoomMailbox","SharedMailbox")}
 
-foreach ($Mailbox in $Mailboxes) {
+foreach ($Mailbox in $MailboxesToSearch) {
     $RoomPermissions = $null
     $RoomPermissions = Get-EXOMailboxFolderPermission -Identity "$($Mailbox.UserPrincipalName):\Calendar"
     foreach ($PermissionSet in $RoomPermissions) {
         foreach ($AccessRight in $PermissionSet.AccessRights) {
             If($AccessRight -notin $AccessRightsExclusions) {
+                $DelegateMailbox = $null
+                $DelegateMailbox = $AllMailboxes | Where-Object {$_.PrimarySmtpAddress -eq $PermissionSet.User}
                 $PermissionObject = [PSCustomObject]@{}
                 $PermissionObject = [PSCustomObject]@{
-                    #UserPrincipalName = $Mailbox.UserPrincipalName
-                    DisplayName = $Mailbox.DisplayName
-                    UserWithAccess = $PermissionSet.User
+                    MailboxUPN = $Mailbox.UserPrincipalName
+                    MailboxDisplayName = $Mailbox.DisplayName
+                    DelegateUPN = $DelegateMailbox.UserPrincipalName
+                    DelegateDisplayName = $DelegateMailbox.DisplayName
                     AccessRights = $AccessRight
                     SharingPermissionFlags = $Permission.SharingPermissionFlags
                     RecipientTypeDetails = $Mailbox.RecipientTypeDetails
