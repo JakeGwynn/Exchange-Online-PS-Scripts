@@ -28,7 +28,8 @@ foreach ($Mailbox in $Mailboxes) {
             If($AccessRight -notin $AccessRightsExclusions) {
                 $PermissionObject = [PSCustomObject]@{}
                 $PermissionObject = [PSCustomObject]@{
-                    Mailbox = $Mailbox.UserPrincipalName
+                    #UserPrincipalName = $Mailbox.UserPrincipalName
+                    DisplayName = $Mailbox.DisplayName
                     UserWithAccess = $PermissionSet.User
                     AccessRights = $AccessRight
                     SharingPermissionFlags = $Permission.SharingPermissionFlags
