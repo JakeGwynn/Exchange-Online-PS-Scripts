@@ -1,3 +1,6 @@
+#Edit $UserPrincipalName with the UPN of the user you are logging into Exchange Online PowerShell with
+$UserPrincipalName = "username@domain.com"
+
 Connect-ExchangeOnline
 
 [System.Collections.Generic.List[psobject]]$MailboxImportRequestStatistics = @()
@@ -30,7 +33,7 @@ foreach ($input in $MailboxImportRequests){
 }
 
 <#
-Start-RobustCloudCommand -UserPrincipalName jakegwynn@jakegwynndemo.com -recipients $MailboxImportRequests -IdentifyingProperty Mailbox -logfile C:\temp\out.log -ScriptBlock {
+Start-RobustCloudCommand -UserPrincipalName $UserPrincipalName -recipients $MailboxImportRequests -IdentifyingProperty Mailbox -logfile C:\temp\out.log -ScriptBlock {
     $RequestStatistic = $null
     $PstImportRequestData = [PSCustomObject]@{}
     $RequestStatistic = Get-MailboxImportRequestStatistics -Identity $input.RequestGuid
