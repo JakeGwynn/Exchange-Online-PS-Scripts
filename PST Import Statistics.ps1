@@ -7,6 +7,8 @@ Connect-ExchangeOnline
 
 $Mailboxes = Get-ExoMailbox -ResultSize Unlimited
 [array]$MailboxImportRequests = Get-MailboxImportRequest -ResultSize Unlimited
+$ImportRequestCount = 0
+$i = 0
 
 foreach ($input in $MailboxImportRequests){
     $RequestStatistic = $null
