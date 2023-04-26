@@ -18,6 +18,7 @@
 
 # Specify the Azure AD Group ID
 $groupName = "<Group Name>"
+$CsvExportPath = "C:\temp\$($GroupName)_Group-Mailbox-Statistics.csv"
 
 # Connect to AzureAD
 Connect-AzureAD
@@ -56,7 +57,7 @@ foreach ($member in $groupMembers) {
 }
     
 # Output the combined list to a CSV file
-$combinedOutput | Export-Csv -Path "GroupMembers_MailboxStatistics.csv" -NoTypeInformation
+$combinedOutput | Export-Csv -Path $CsvExportPath -NoTypeInformation
 
 Disconnect-AzureAD
 Disconnect-ExchangeOnline
