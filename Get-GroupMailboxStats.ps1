@@ -30,7 +30,7 @@ Connect-ExchangeOnline
 $groupId = (Get-AzureADGroup -Filter "DisplayName eq '$groupName'").ObjectId
 
 # Retrieve the group members
-$groupMembers = Get-AzureADGroupMember -ObjectId $groupId
+$groupMembers = Get-AzureADGroupMember -ObjectId $groupId -All $true
 
 # Create an empty generic list to store the combined output
 $combinedOutput = New-Object 'System.Collections.Generic.List[System.Object]'
