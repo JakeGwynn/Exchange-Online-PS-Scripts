@@ -29,8 +29,11 @@ do
 {
     $messages = Get-QuarantineMessage -pagesize 1000 -Page $Page
     $Page++
-    if ($messages) {
+    if ($messages.Count -gt 1) {
         $quarantineMessages.AddRange($messages)
+    }
+    elseif ($messages) {
+        $quarantineMessages.Add($messages)
     }
 }
 until ($messages -eq $null)
