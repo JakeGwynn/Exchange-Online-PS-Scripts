@@ -1,0 +1,67 @@
+
+<#
+  Copyright 2023 Jake Gwynn
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+  FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#>
+
+$HeaderString = "X-CustomSpam"
+
+[System.Net.ServicePointManager]::SecurityProtocol = 'TLS12'
+
+# Connect to Exchange Online
+Connect-ExchangeOnline -ShowBanner:$false
+
+# Get All Quarantine Messages in batches of 1000
+$quarantineMessages = New-Object System.Collections.Generic.List[Object]
+$Page = 1
+do
+{
+    $messages = Get-QuarantineMessage -pagesize 1000 -Page $Page
+    $Page++
+    if ($messages) {
+        $quarantineMessages.AddRange($messages)
+    }
+}
+until ($messages -eq $null)
+
+# Create empty generic list
+$quarantineMessagesWithCustomHeader = New-Object System.Collections.Generic.List[Object]
+
+# Loop through all messages and search for the specified HeaderString
+foreach ($message in $quarantineMessages) {
+    $Header = Get-QuarantineMessageHeader -Identity $message.Identity
+    # Search the header for the X-CustomSpam header
+    $CustomSpamHeader = $Header | Where-Object { $_.Header -match "$HeaderString" }
+    if ($CustomSpamHeader) {
+        Write-Host "Found $HeaderString header in message with ID: $($message.Identity)"
+        $quarantineMessagesWithCustomHeader.Add([PSCustomObject]@{
+            'Recipient Address' = $message.recipientAddress
+            'Sender Address' = $message.senderAddress
+            Subject = $message.subject
+            'Quarantine MessageId' = $message.MessageId
+            'Received Time' = $message.ReceivedTime
+            Type = $message.Type
+            Direction = $message.Direction
+            Size = $message.Size
+            'Tag Name' = $message.TagName
+            'Message Header' = $CustomSpamHeader.Header
+            'Full Message Details' = $message
+        })
+    } else {
+        Write-Host "X-CustomSpam header not found in message with ID: $($message.MessageId)"
+    }
+}
+
+# Disconnect from services
+Disconnect-ExchangeOnline
