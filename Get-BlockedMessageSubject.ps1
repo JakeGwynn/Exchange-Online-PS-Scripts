@@ -65,7 +65,16 @@ $MessageTrace = Get-Messagetrace -MessageTraceId $MessageTraceId
 $InternetMessageId = $MessageTrace[0].MessageId
 $UserSMTPAddress = $MessageTrace[0].SenderAddress
 
-$uri = "https://graph.microsoft.com/v1.0/users/$UserSMTPAddress/messages?`$filter=internetMessageId eq '$InternetMessageId'"
-$messages = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+try{
+    $uri = "https://graph.microsoft.com/v1.0/users/$UserSMTPAddress/messages?`$filter=internetMessageId eq '$InternetMessageId'"
+    $messages = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+}
+catch {
+    $RestError = $null
+    $RestError = Get-RestApiError -RestError $_
+    Write-Host $_ -ForegroundColor Red
+    return Write-Host $RestError -ForegroundColor Red 
+}
+
 
 Write-Host "Message Subject: $($messages.value.subject)"
